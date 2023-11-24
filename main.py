@@ -20,7 +20,7 @@ class Name(Field):
 class Birthday(Field):
     @Field.value.setter
     def value(self, value: str):
-        self.__value = datetime.strptime(value, '%Y-%m-%d').date()
+        self._value = datetime.strptime(value, '%Y-%m-%d').date()
 
 class Phone(Field):
     def __init__(self, value):
@@ -35,35 +35,35 @@ class Phone(Field):
         super(Phone, Phone).value.__set__(self, value)
 
 class Record:
-    def __init__(self, name, phone, birthday=None):
+    def __init__(self, name, birthday=None):
         self.name = Name(name)
-        self.phones = [Phone(phone)]
-        self.birthday = Birthday(birthday)
+        self.phones = []
+        self.birthday = Birthday(birthday) if birthday else None
 
     def add_phone(self, phone):
         self.phones.append(Phone(phone))
 
-    def remove_phone(self, phone):
-        for p in self.phones:
-            if p.value == phone:
-                self.phones.remove(p)
+    def remove_phone(self, phone_to_remove):
+        for phone in self.phones:
+            if phone.value == phone_to_remove:
+                self.phones.remove(phone)
                 break
 
     def edit_phone(self, old_phone, new_phone):
-        for p in self.phones:
-            if p.value == old_phone:
-                p.value = new_phone
+        for phone in self.phones:
+            if phone.value == old_phone:
+                phone.value = new_phone
                 return
         raise ValueError(f"Phone {old_phone} not found")
 
-    def find_phone(self, phone):
-        for p in self.phones:
-            if p.value == phone:
-                return p
+    def find_phone(self, phone_to_find):
+        for phone in self.phones:
+            if phone.value == phone_to_find:
+                return phone
         return None
 
     def days_to_birthday(self):
-        if self.birthday.value:
+        if self.birthday and self.birthday.value:
             today = datetime.today()
             next_birthday = datetime(today.year, self.birthday.value.month, self.birthday.value.day)
             if today > next_birthday:
@@ -72,7 +72,7 @@ class Record:
         return None
 
     def __str__(self):
-        return f"Contact name: {self.name}, phones: {'; '.join(str(p) for p in self.phones)}, birthday: {self.birthday}"
+        return f"Contact name: {self.name}, phones: {'; '.join(str(phone) for phone in self.phones)}, birthday: {self.birthday.value if self.birthday else None}"
 
 class AddressBook(UserDict):
     def add_record(self, record):
@@ -95,6 +95,3 @@ class AddressBook(UserDict):
                 yield result
                 counter = 0
                 result = ''
-
-
-
