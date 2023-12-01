@@ -20,7 +20,10 @@ class Name(Field):
 class Birthday(Field):
     @Field.value.setter
     def value(self, value: str):
-        self._value = datetime.strptime(value, '%Y-%m-%d').date()
+        try:
+            self._value = datetime.strptime(value, '%Y-%m-%d').date()
+        except ValueError:
+            raise ValueError(f"Invalid date format: {value}. Please use the format 'YYYY-MM-DD'.")
 
 class Phone(Field):
     def __init__(self, value):
